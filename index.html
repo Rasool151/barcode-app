@@ -7,102 +7,73 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="پردیس کتاب">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icon.svg">
 <title>پردیس کتاب</title>
 
-<script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
 <style>
-  :root{
-    --bg:#f1f5f9;--card:#fff;--primary:#1e40af;--text:#0f172a;
-    --muted:#64748b;--success:#059669;--danger:#dc2626;--border:#e2e8f0;
-  }
+  :root{--bg:#f1f5f9;--card:#fff;--primary:#1e40af;--text:#0f172a;--muted:#64748b;--danger:#dc2626;--border:#e2e8f0;--book:#1e40af;--nonbook:#059669}
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-  body{margin:0;font-family:Vazirmatn,Tahoma,sans-serif;background:var(--bg);color:var(--text);
-       min-height:100vh;min-height:100dvh}
-  header{background:linear-gradient(135deg,#1e293b,#334155);color:#fff;padding:16px;
-         padding-top:max(16px,env(safe-area-inset-top));display:flex;justify-content:space-between;
-         align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.1);position:sticky;top:0;z-index:10}
-  header h1{font-size:18px;margin:0;font-weight:700}
-  .icon-btn{background:rgba(255,255,255,.15);border:none;color:#fff;padding:8px 12px;
-            border-radius:8px;font-size:14px;cursor:pointer;font-family:inherit}
+  body{margin:0;font-family:Tahoma,sans-serif;background:var(--bg);color:var(--text);min-height:100dvh}
+  header{background:linear-gradient(135deg,#1e293b,#334155);color:#fff;padding:16px;padding-top:max(16px,env(safe-area-inset-top));display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10}
+  header h1{font-size:18px;margin:0}
+  .icon-btn{background:rgba(255,255,255,.15);border:none;color:#fff;padding:8px 12px;border-radius:8px;font-size:14px;font-family:inherit}
   main{padding:16px;max-width:600px;margin:0 auto}
-  .card{background:var(--card);border-radius:12px;padding:16px;
-        box-shadow:0 1px 3px rgba(0,0,0,.05);margin-bottom:12px}
+  .card{background:var(--card);border-radius:12px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.05);margin-bottom:12px}
   .search-row{display:flex;gap:8px;margin-bottom:12px}
-  .search-input{flex:1;padding:14px 16px;border:2px solid var(--border);border-radius:10px;
-                font-size:16px;font-family:inherit;background:#fff;color:var(--text);
-                outline:none;text-align:center;direction:ltr;letter-spacing:1px}
+  .search-input{flex:1;padding:14px;border:2px solid var(--border);border-radius:10px;font-size:16px;font-family:inherit;background:#fff;outline:none;text-align:center;direction:ltr}
   .search-input:focus{border-color:var(--primary)}
-  .btn{padding:14px 20px;border:none;border-radius:10px;font-size:15px;font-weight:600;
-       font-family:inherit;cursor:pointer;transition:transform .1s;display:inline-flex;
-       align-items:center;justify-content:center;gap:8px}
-  .btn:active{transform:scale(.97)}
+  .btn{padding:14px 20px;border:none;border-radius:10px;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer}
+  .btn:active{opacity:.85}
   .btn-primary{background:var(--primary);color:#fff}
   .btn-secondary{background:#e2e8f0;color:var(--text)}
-  .btn-scan{width:100%;padding:20px;font-size:18px;
-            background:linear-gradient(135deg,#1e40af,#3b82f6);color:#fff;
-            border-radius:12px;box-shadow:0 4px 12px rgba(30,64,175,.3)}
+  .btn-scan{width:100%;padding:20px;font-size:18px;background:linear-gradient(135deg,#1e40af,#3b82f6);color:#fff;border-radius:12px}
   .hint{text-align:center;color:var(--muted);font-size:13px;margin-top:8px}
-  .result{display:none;animation:fadeIn .3s}
-  .result.show{display:block}
+  .result{display:none;animation:fadeIn .3s}.result.show{display:block}
   @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
   .product-name{font-size:18px;font-weight:700;margin:0 0 12px;line-height:1.5}
+  .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700;margin-bottom:8px}
+  .badge-book{background:#dbeafe;color:#1e40af}
+  .badge-nonbook{background:#d1fae5;color:#065f46}
   .product-row{display:flex;padding:8px 0;border-bottom:1px solid var(--border);font-size:14px}
   .product-row:last-child{border-bottom:none}
   .product-row .label{color:var(--muted);min-width:90px;font-weight:500}
   .product-row .value{flex:1;font-weight:500;text-align:right}
   .product-row .value.num{direction:ltr;text-align:right}
-  .stock-badge{display:inline-block;padding:4px 10px;border-radius:20px;
-               font-size:13px;font-weight:700}
-  .stock-ok{background:#d1fae5;color:#065f46}
-  .stock-zero{background:#fee2e2;color:#991b1b}
-  .not-found{background:#fef2f2;border:2px dashed #fecaca;color:var(--danger);
-             padding:24px;border-radius:12px;text-align:center;font-weight:600;font-size:16px}
-  .not-found .barcode{display:block;font-family:monospace;font-size:14px;color:var(--muted);
-                       margin-top:8px;direction:ltr}
-  #scanner-overlay{display:none;position:fixed;inset:0;background:#000;z-index:100;
-                    flex-direction:column}
+  .stock-badge{display:inline-block;padding:4px 10px;border-radius:20px;font-size:13px;font-weight:700}
+  .stock-ok{background:#d1fae5;color:#065f46}.stock-zero{background:#fee2e2;color:#991b1b}
+  .not-found{background:#fef2f2;border:2px dashed #fecaca;color:var(--danger);padding:24px;border-radius:12px;text-align:center;font-weight:600}
+  .not-found .barcode{display:block;font-family:monospace;font-size:14px;color:var(--muted);margin-top:8px;direction:ltr}
+  #scanner-overlay{display:none;position:fixed;inset:0;background:#000;z-index:100;flex-direction:column}
   #scanner-overlay.show{display:flex}
-  #reader{flex:1;width:100%;position:relative}
+  #reader{flex:1;position:relative}
   #reader video{width:100%!important;height:100%!important;object-fit:cover}
-  .scanner-header{background:rgba(0,0,0,.85);color:#fff;padding:16px;
-                  padding-top:max(16px,env(safe-area-inset-top));display:flex;
-                  justify-content:space-between;align-items:center}
-  .scanner-header span{font-size:15px;font-weight:600}
-  .scanner-header button{background:rgba(255,255,255,.2);border:none;color:#fff;
-                         padding:8px 16px;border-radius:8px;font-family:inherit;
-                         font-size:14px;cursor:pointer}
-  .scanner-hint{position:absolute;bottom:40px;left:0;right:0;text-align:center;color:#fff;
-                font-size:14px;text-shadow:0 1px 4px rgba(0,0,0,.8);padding:0 20px}
-  #toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(100px);
-         background:#1e293b;color:#fff;padding:12px 20px;border-radius:10px;font-size:14px;
-         font-weight:500;box-shadow:0 8px 20px rgba(0,0,0,.2);opacity:0;
-         transition:all .3s;z-index:200;max-width:90vw;text-align:center}
+  .scanner-header{background:rgba(0,0,0,.85);color:#fff;padding:16px;padding-top:max(16px,env(safe-area-inset-top));display:flex;justify-content:space-between;align-items:center}
+  .scanner-header button{background:rgba(255,255,255,.2);border:none;color:#fff;padding:8px 16px;border-radius:8px;font-family:inherit;font-size:14px}
+  .scanner-hint{position:absolute;bottom:40px;left:0;right:0;text-align:center;color:#fff;font-size:14px;text-shadow:0 1px 4px rgba(0,0,0,.8);padding:0 20px}
+  #toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(100px);background:#1e293b;color:#fff;padding:12px 20px;border-radius:10px;font-size:14px;opacity:0;transition:all .3s;z-index:200;max-width:90vw;text-align:center}
   #toast.show{transform:translateX(-50%) translateY(0);opacity:1}
-  #loading{display:none;position:fixed;inset:0;background:rgba(15,23,42,.92);z-index:300;
-           align-items:center;justify-content:center;flex-direction:column;color:#fff;
-           padding:20px;text-align:center}
+  #loading{display:none;position:fixed;inset:0;background:rgba(15,23,42,.92);z-index:300;align-items:center;justify-content:center;flex-direction:column;color:#fff;padding:20px;text-align:center}
   #loading.show{display:flex}
-  .spinner{width:48px;height:48px;border:4px solid rgba(255,255,255,.2);
-           border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;
-           margin-bottom:20px}
+  .spinner{width:48px;height:48px;border:4px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;margin-bottom:20px}
   @keyframes spin{to{transform:rotate(360deg)}}
   #loading .title{font-size:17px;font-weight:600;margin-bottom:8px}
   #loading .subtitle{font-size:14px;color:#94a3b8}
-  #settings-panel{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);
-                  z-index:90;align-items:flex-end}
+  #settings-panel{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:90;align-items:flex-end}
   #settings-panel.show{display:flex}
-  .settings-sheet{background:#fff;width:100%;border-radius:20px 20px 0 0;padding:20px;
-                  padding-bottom:max(20px,env(safe-area-inset-bottom));
-                  animation:slideUp .3s}
-  @keyframes slideUp{from{transform:translateY(100%)}to{transform:none}}
+  .settings-sheet{background:#fff;width:100%;border-radius:20px 20px 0 0;padding:20px;padding-bottom:max(20px,env(safe-area-inset-bottom))}
   .settings-sheet h3{margin:0 0 16px;font-size:17px;text-align:center}
-  .settings-item{padding:14px 16px;border-radius:10px;background:#f8fafc;
-                 margin-bottom:8px;display:flex;justify-content:space-between;
-                 align-items:center;font-size:15px}
+  .settings-item{padding:14px 16px;border-radius:10px;background:#f8fafc;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;font-size:15px}
   .settings-item .value{color:var(--muted);font-size:14px}
+  .settings-item.upload-book{background:#eff6ff}
+  .settings-item.upload-nonbook{background:#ecfdf5}
   .hidden-input{display:none}
+  #log{display:none;position:fixed;bottom:0;left:0;right:0;background:#000;color:#0f0;font-family:monospace;font-size:11px;padding:8px;max-height:35vh;overflow:auto;z-index:500;direction:ltr;text-align:left}
+  #log.show{display:block}
+  .status-bar{background:#f8fafc;padding:8px 16px;text-align:center;font-size:12px;color:var(--muted);border-bottom:1px solid var(--border)}
 </style>
 </head>
 <body>
@@ -112,15 +83,16 @@
   <button class="icon-btn" id="settingsBtn">⚙️ تنظیمات</button>
 </header>
 
+<div class="status-bar" id="statusBar">در حال بارگذاری...</div>
+
 <main>
   <div class="card">
     <div class="search-row">
-      <input type="tel" inputmode="numeric" class="search-input" id="searchInput"
-             placeholder="کد کالا یا شابک" autocomplete="off">
+      <input type="tel" inputmode="numeric" class="search-input" id="searchInput" placeholder="کد کالا یا شابک" autocomplete="off">
       <button class="btn btn-primary" id="searchBtn">جستجو</button>
     </div>
     <button class="btn btn-scan" id="scanBtn">📷 اسکن بارکد با دوربین</button>
-    <p class="hint">کد ۱ تا ۶ رقمی یا شابک ۱۳ رقمی را وارد کنید</p>
+    <p class="hint">کد ۱ تا ۶ رقمی یا شابک ۱۳ رقمی</p>
   </div>
   <div id="resultArea"></div>
 </main>
@@ -131,48 +103,90 @@
     <button id="closeScanner">بستن</button>
   </div>
   <div id="reader"></div>
-  <div class="scanner-hint">شابک پشت جلد کتاب را اسکن کنید</div>
+  <div class="scanner-hint">بارکد کتاب یا کالا را اسکن کنید</div>
 </div>
 
 <div id="settings-panel">
   <div class="settings-sheet">
-    <h3>تنظیمات</h3>
-    <div class="settings-item">
-      <span>تعداد کالاهای ذخیره شده</span>
-      <span class="value" id="productCount">—</span>
+    <h3>تنظیمات و آپلود داده‌ها</h3>
+
+    <div class="settings-item upload-book" id="uploadBook" style="cursor:pointer">
+      <span>📚 آپلود فایل اکسل کتاب‌ها</span>
+      <span class="value" id="countBook">—</span>
     </div>
-    <div class="settings-item" id="uploadRow" style="cursor:pointer">
-      <span>📁 آپلود / به‌روزرسانی فایل اکسل</span>
-      <span class="value">›</span>
+
+    <div class="settings-item upload-nonbook" id="uploadNonbook" style="cursor:pointer">
+      <span>📦 آپلود فایل اکسل غیرکتابی</span>
+      <span class="value" id="countNonbook">—</span>
     </div>
+
     <div class="settings-item" id="clearRow" style="cursor:pointer">
       <span>🗑️ پاک کردن همه داده‌ها</span>
       <span class="value">›</span>
     </div>
+
+    <div class="settings-item" id="logRow" style="cursor:pointer">
+      <span>🐛 نمایش/مخفی لاگ خطا</span>
+      <span class="value">›</span>
+    </div>
+
     <button class="btn btn-secondary" style="width:100%;margin-top:12px" id="closeSettings">بستن</button>
   </div>
 </div>
 
 <input type="file" id="excelInput" class="hidden-input" accept=".xlsx,.xls,.csv">
 <div id="toast"></div>
-
 <div id="loading">
   <div class="spinner"></div>
   <div class="title" id="loadingTitle">در حال پردازش...</div>
   <div class="subtitle" id="loadingSubtitle">لطفاً صبر کنید</div>
 </div>
+<pre id="log"></pre>
 
 <script>
+// ========== LOGGER ==========
+const logEl = document.getElementById('log');
+function log(msg){
+  const t = new Date().toLocaleTimeString('fa-IR');
+  logEl.textContent += `[${t}] ${msg}\n`;
+  logEl.scrollTop = logEl.scrollHeight;
+  console.log(msg);
+}
+function showLog(){ logEl.classList.add('show'); }
+function hideLog(){ logEl.classList.remove('show'); }
+logEl.addEventListener('dblclick', hideLog);
+
+log('App start');
+log('XLSX: ' + (typeof XLSX !== 'undefined' ? 'OK v'+(XLSX.version||'?') : 'NOT LOADED'));
+log('Html5Qrcode: ' + (typeof Html5Qrcode !== 'undefined' ? 'OK' : 'NOT LOADED'));
+log('SW supported: ' + ('serviceWorker' in navigator));
+log('UA: ' + navigator.userAgent);
+
+if(typeof XLSX === 'undefined'){
+  setTimeout(()=>{ toast('کتابخانه اکسل لود نشد', 5000); showLog(); }, 1000);
+}
+
+// ========== SERVICE WORKER ==========
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('./service-worker.js')
+      .then(r => log('SW registered: ' + r.scope))
+      .catch(e => log('SW err: ' + e));
+  });
+}
+
+// ========== DB ==========
 const DB_NAME='pardis_books', DB_VERSION=1, STORE='products';
 let db=null, html5QrCode=null;
-const $=s=>document.querySelector(s);
+let currentUploadType = 'book';
+const $ = s => document.querySelector(s);
+
 const FA='۰۱۲۳۴۵۶۷۸۹', AR='٠١٢٣٤٥٦٧٨٩';
 const norm=s=>String(s||'').replace(/[۰-۹]/g,d=>FA.indexOf(d)).replace(/[٠-٩]/g,d=>AR.indexOf(d));
 const fmt=n=>Number(n||0).toLocaleString('fa-IR');
-function toast(m,d=2500){const e=$('#toast');e.textContent=m;e.classList.add('show');
-  clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),d)}
-function showLoad(t,s){$('#loadingTitle').textContent=t||'در حال پردازش...';
-  $('#loadingSubtitle').textContent=s||'لطفاً صبر کنید';$('#loading').classList.add('show')}
+
+function toast(m,d=2500){const e=$('#toast');e.textContent=m;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),d)}
+function showLoad(t,s){$('#loadingTitle').textContent=t||'در حال پردازش...';$('#loadingSubtitle').textContent=s||'لطفاً صبر کنید';$('#loading').classList.add('show')}
 function hideLoad(){$('#loading').classList.remove('show')}
 
 function openDB(){
@@ -180,102 +194,208 @@ function openDB(){
     if(db) return res(db);
     const r=indexedDB.open(DB_NAME,DB_VERSION);
     r.onupgradeneeded=e=>{
+      log('DB upgrade');
       const d=e.target.result;
       if(!d.objectStoreNames.contains(STORE)){
         const s=d.createObjectStore(STORE,{keyPath:'id',autoIncrement:true});
         s.createIndex('isbn','isbn',{unique:false});
         s.createIndex('code','code',{unique:false});
+        s.createIndex('source','source',{unique:false});
       }
     };
-    r.onsuccess=()=>{db=r.result;res(db)};
-    r.onerror=()=>rej(r.error);
+    r.onsuccess=()=>{db=r.result;log('DB opened');res(db)};
+    r.onerror=()=>{log('DB err: '+r.error);rej(r.error)};
   });
 }
-async function getCount(){const d=await openDB();
-  return new Promise((res,rej)=>{const t=d.transaction(STORE,'readonly');
-    const r=t.objectStore(STORE).count();r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
-async function clearAll(){const d=await openDB();
-  return new Promise((res,rej)=>{const t=d.transaction(STORE,'readwrite');
-    t.objectStore(STORE).clear();t.oncomplete=()=>res();t.onerror=()=>rej(t.error)})}
-async function bulkInsert(items,onP){
-  const d=await openDB();
+
+async function getCountBySource(src){
+  const d = await openDB();
+  return new Promise(res=>{
+    const t = d.transaction(STORE,'readonly');
+    const idx = t.objectStore(STORE).index('source');
+    const r = idx.count(src);
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => res(0);
+  });
+}
+async function clearBySource(src){
+  const d = await openDB();
+  return new Promise((res,rej)=>{
+    const t = d.transaction(STORE,'readwrite');
+    const idx = t.objectStore(STORE).index('source');
+    const req = idx.openCursor(IDBKeyRange.only(src));
+    req.onsuccess = e => {
+      const c = e.target.result;
+      if(c){ c.delete(); c.continue(); }
+    };
+    t.oncomplete = () => res();
+    t.onerror = () => rej(t.error);
+  });
+}
+async function clearAll(){
+  const d = await openDB();
   return new Promise((res,rej)=>{
     const t=d.transaction(STORE,'readwrite');
-    const s=t.objectStore(STORE);
-    items.forEach((it,i)=>{s.put(it);if(onP&&i%300===0)onP(i,items.length)});
-    t.oncomplete=()=>res(items.length);
+    t.objectStore(STORE).clear();
+    t.oncomplete=()=>res();
     t.onerror=()=>rej(t.error);
   });
 }
+async function bulkInsert(items){
+  const d = await openDB();
+  return new Promise((res,rej)=>{
+    const t = d.transaction(STORE,'readwrite');
+    const s = t.objectStore(STORE);
+    items.forEach(it => s.put(it));
+    t.oncomplete = () => res(items.length);
+    t.onerror = () => { log('insert err: '+t.error); rej(t.error) };
+  });
+}
 async function findByIndex(idx,val){
-  const d=await openDB();
+  const d = await openDB();
   return new Promise(res=>{
-    const t=d.transaction(STORE,'readonly');
-    const r=t.objectStore(STORE).index(idx).get(val);
-    r.onsuccess=()=>res(r.result||null);r.onerror=()=>res(null);
+    const t = d.transaction(STORE,'readonly');
+    const r = t.objectStore(STORE).index(idx).get(val);
+    r.onsuccess = () => res(r.result||null);
+    r.onerror = () => res(null);
   });
 }
 async function findProduct(q){
-  q=String(q||'').trim();
+  q = String(q||'').trim();
   if(!q) return null;
-  let r=await findByIndex('isbn',q); if(r) return r;
-  r=await findByIndex('code',q); if(r) return r;
-  const nq=norm(q);
-  if(nq!==q){r=await findByIndex('isbn',nq);if(r)return r;
-    r=await findByIndex('code',nq);if(r)return r}
+  let r = await findByIndex('isbn', q); if(r) return r;
+  r = await findByIndex('code', q); if(r) return r;
+  const nq = norm(q);
+  if(nq !== q){
+    r = await findByIndex('isbn', nq); if(r) return r;
+    r = await findByIndex('code', nq); if(r) return r;
+  }
   return null;
 }
+function pnum(v){
+  if(v==null||v==='') return 0;
+  const s = String(v).replace(/[^\d.-]/g,'');
+  const n = parseFloat(s);
+  return isNaN(n) ? 0 : n;
+}
 
-function pnum(v){if(v==null||v==='')return 0;const s=String(v).replace(/[^\d.-]/g,'');
-  const n=parseFloat(s);return isNaN(n)?0:n}
-
+// ========== خواندن اکسل ==========
 async function parseExcel(file){
-  const buf=await file.arrayBuffer();
-  const wb=XLSX.read(buf,{type:'array'});
-  const ws=wb.Sheets[wb.SheetNames[0]];
-  const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:false});
-  let hIdx=-1;
-  for(let i=0;i<Math.min(30,rows.length);i++){
-    const r=rows[i]||[];
-    if(r.some(c=>String(c).includes('شابك')||String(c).includes('شابک'))){hIdx=i;break}
+  log('parseExcel: ' + file.name + ' size=' + file.size);
+  if(typeof XLSX === 'undefined') throw new Error('کتابخانه XLSX لود نشده');
+
+  const buf = await file.arrayBuffer();
+  log('bytes: ' + buf.byteLength);
+
+  let wb;
+  try { wb = XLSX.read(new Uint8Array(buf), {type:'array'}); }
+  catch(e){ throw new Error('فایل اکسل خوانده نشد: ' + e.message); }
+  log('sheets: ' + wb.SheetNames.join(','));
+
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  if(!ws) throw new Error('شیت اول خالی است');
+
+  const rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:'', raw:false});
+  log('rows: ' + rows.length);
+
+  let hIdx = -1;
+  for(let i=0;i<Math.min(40,rows.length);i++){
+    const r = rows[i]||[];
+    const joined = r.join(' ');
+    if(joined.includes('شابك') || joined.includes('شابک') ||
+       (joined.includes('نام') && joined.includes('كد'))){
+      hIdx = i; break;
+    }
   }
-  if(hIdx===-1) hIdx=7;
-  const out=[];
+  if(hIdx === -1) hIdx = 7;
+  log('header idx: ' + hIdx);
+
+  const header = rows[hIdx] || [];
+  log('header: ' + header.slice(0,17).map(x=>String(x).slice(0,15)).join(' | '));
+
+  // شناسایی موقعیت ستون‌ها بر اساس نام
+  const findCol = (names) => {
+    for(let i=0;i<header.length;i++){
+      const h = String(header[i]||'').trim();
+      for(const n of names){ if(h.includes(n)) return i; }
+    }
+    return -1;
+  };
+  const colCode  = findCol(['كد','کد کالا','کد']);
+  const colName  = findCol(['نام كالا','نام کالا','نام']);
+  const colAuthor= findCol(['نويسنده','نویسنده','مترجم']);
+  const colCat   = findCol(['دسته بندي','دسته‌بندی','دسته']);
+  const colPrice = findCol(['قيمت','قیمت']);
+  const colStock = findCol(['موجودي','موجودی']);
+  const colLoc   = findCol(['كد محل','کد محل','محل']);
+  const colSubj  = findCol(['كد موضوع','کد موضوع','موضوع']);
+  const colPub   = findCol(['ناشر']);
+  const colSeller= findCol(['آخرين فروشنده','آخرین فروشنده','فروشنده']);
+  const colYear  = findCol(['تاريخ چاپ','تاریخ چاپ','سال چاپ']);
+  const colIsbn  = findCol(['شابك','شابک','ISBN','isbn']);
+
+  const useCol = (idx, fallback) => idx >= 0 ? idx : fallback;
+
+  const cCode = useCol(colCode, 1);
+  const cName = useCol(colName, 2);
+  const cAuthor = useCol(colAuthor, 3);
+  const cCat = useCol(colCat, 4);
+  const cPrice = useCol(colPrice, 5);
+  const cStock = useCol(colStock, 6);
+  const cLoc = useCol(colLoc, 8);
+  const cSubj = useCol(colSubj, 10);
+  const cPub = useCol(colPub, 12);
+  const cSeller = useCol(colSeller, 13);
+  const cYear = useCol(colYear, 14);
+  const cIsbn = useCol(colIsbn, 15);
+
+  log(`cols code=${cCode} name=${cName} isbn=${cIsbn}`);
+
+  const out = [];
   for(let i=hIdx+1;i<rows.length;i++){
-    const r=rows[i]||[]; if(!r.length) continue;
-    if(String(r[0]||'').includes('جمع')) break;
-    const code=String(r[1]||'').trim();
-    const name=String(r[2]||'').trim();
-    if(!code&&!name) continue;
-    const isbn=String(r[15]||'').trim().replace(/[^0-9Xx]/g,'');
+    const r = rows[i] || [];
+    if(!r.length) continue;
+    if(String(r[0]||'').includes('جمع')){ log('stop at row '+i); break; }
+    const code = String(r[cCode]||'').trim();
+    const name = String(r[cName]||'').trim();
+    if(!code && !name) continue;
+
+    let isbn = '';
+    if(cIsbn >= 0) isbn = String(r[cIsbn]||'').trim().replace(/[^0-9Xx]/g,'');
+
     out.push({
       code, name,
-      author:String(r[3]||'').trim(),
-      category:String(r[4]||'').trim(),
-      price:pnum(r[5]),
-      stock:pnum(r[6]),
-      activePrice:pnum(r[7]),
-      location:String(r[8]||'').trim(),
-      stopped:String(r[9]||'').trim(),
-      subjectCode:String(r[10]||'').trim(),
-      publisher:String(r[12]||'').trim(),
-      lastSeller:String(r[13]||'').trim(),
-      printYear:String(r[14]||'').trim(),
+      author:   String(r[cAuthor]||'').trim(),
+      category: String(r[cCat]||'').trim(),
+      price:    pnum(r[cPrice]),
+      stock:    pnum(r[cStock]),
+      location: String(r[cLoc]||'').trim(),
+      subjectCode: String(r[cSubj]||'').trim(),
+      publisher: String(r[cPub]||'').trim(),
+      lastSeller: String(r[cSeller]||'').trim(),
+      printYear: String(r[cYear]||'').trim(),
       isbn
     });
   }
+  log('parsed: ' + out.length);
   return out;
 }
 
-const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-function row(l,v,isNum){return `<div class="product-row"><span class="label">${l}</span>
-  <span class="value ${isNum?'num':'fa'}">${esc(v)}</span></div>`}
+// ========== نمایش ==========
+const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function row(l,v,isNum){return `<div class="product-row"><span class="label">${l}</span><span class="value ${isNum?'num':''}">${esc(v)}</span></div>`}
 
 function renderProduct(p){
-  const has=p.stock>0;
-  const stockTxt=has?`موجود: ${fmt(p.stock)} عدد`:'ناموجود';
-  $('#resultArea').innerHTML=`
+  const has = p.stock>0;
+  const stockTxt = has ? `موجود: ${fmt(p.stock)} عدد` : 'ناموجود';
+  const isBook = p.source === 'book';
+  const badge = isBook
+    ? '<span class="badge badge-book">📚 کتاب</span>'
+    : '<span class="badge badge-nonbook">📦 غیرکتابی</span>';
+
+  $('#resultArea').innerHTML = `
     <div class="card result show">
+      ${badge}
       <h2 class="product-name">${esc(p.name||'بدون نام')}</h2>
       ${p.author?row('نویسنده',p.author):''}
       ${p.publisher?row('ناشر',p.publisher):''}
@@ -283,41 +403,33 @@ function renderProduct(p){
       ${p.printYear?row('سال چاپ',p.printYear):''}
       ${p.subjectCode?row('موضوع',p.subjectCode):''}
       ${p.price?row('قیمت',fmt(p.price)+' ریال',true):''}
-      ${p.activePrice&&p.activePrice!==p.price?row('قیمت فعال',fmt(p.activePrice)+' ریال',true):''}
-      <div class="product-row"><span class="label">موجودی</span>
-        <span class="value"><span class="stock-badge ${has?'stock-ok':'stock-zero'}">${stockTxt}</span></span>
-      </div>
+      <div class="product-row"><span class="label">موجودی</span><span class="value"><span class="stock-badge ${has?'stock-ok':'stock-zero'}">${stockTxt}</span></span></div>
       ${p.location?row('کد محل',p.location,true):''}
       ${p.code?row('کد کالا',p.code,true):''}
       ${p.isbn?row('شابک',p.isbn,true):''}
     </div>`;
 }
 function renderNotFound(q){
-  $('#resultArea').innerHTML=`<div class="not-found">
-    کالای مورد نظر یافت نشد
-    <span class="barcode">${esc(q)}</span></div>`;
+  $('#resultArea').innerHTML = `<div class="not-found">کالای مورد نظر یافت نشد<span class="barcode">${esc(q)}</span></div>`;
 }
-function beep(f=880,d=120){
-  try{const c=new (window.AudioContext||window.webkitAudioContext)();
-    const o=c.createOscillator(),g=c.createGain();
-    o.connect(g);g.connect(c.destination);o.frequency.value=f;g.gain.value=.08;
-    o.start();setTimeout(()=>{o.stop();c.close()},d)}catch(e){}
-}
+function beep(f=880,d=120){try{const c=new (window.AudioContext||window.webkitAudioContext)();const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=f;g.gain.value=.08;o.start();setTimeout(()=>{o.stop();c.close()},d)}catch(e){}}
 
 async function doSearch(){
-  const q=$('#searchInput').value.trim();
+  const q = $('#searchInput').value.trim();
   if(!q){toast('لطفاً کد یا شابک را وارد کنید');return}
-  const p=await findProduct(q);
+  const p = await findProduct(q);
   if(p) renderProduct(p); else renderNotFound(q);
 }
 
+// ========== اسکنر ==========
 async function doScan(){
+  if(typeof Html5Qrcode === 'undefined'){toast('اسکنر لود نشد',4000);showLog();return}
   $('#scanner-overlay').classList.add('show');
   try{
-    if(!html5QrCode) html5QrCode=new Html5Qrcode('reader');
+    if(!html5QrCode) html5QrCode = new Html5Qrcode('reader');
     await html5QrCode.start(
       {facingMode:'environment'},
-      {fps:10,qrbox:{width:280,height:180},
+      {fps:10, qrbox:{width:280,height:180},
        formatsToSupport:[
          Html5QrcodeSupportedFormats.EAN_13,
          Html5QrcodeSupportedFormats.EAN_8,
@@ -327,76 +439,101 @@ async function doScan(){
          Html5QrcodeSupportedFormats.CODE_39,
          Html5QrcodeSupportedFormats.ITF
        ]},
-      onScan,()=>{});
+      onScan, ()=>{});
   }catch(err){
-    console.error(err);
-    toast('دسترسی به دوربین ممکن نشد. مجوز دوربین را بررسی کنید.');
+    log('scanner err: '+err);
+    toast('دسترسی به دوربین ممکن نشد');
     await closeScanner();
   }
 }
 async function onScan(code){
   await closeScanner();
-  code=String(code||'').trim();
-  $('#searchInput').value=code;
-  const p=await findProduct(code);
-  if(p){renderProduct(p);beep(1000,100);
-    if(navigator.vibrate)navigator.vibrate(80)}
-  else{renderNotFound(code);beep(300,200);
-    if(navigator.vibrate)navigator.vibrate([80,50,80])}
+  code = String(code||'').trim();
+  $('#searchInput').value = code;
+  const p = await findProduct(code);
+  if(p){renderProduct(p);beep(1000,100);if(navigator.vibrate)navigator.vibrate(80)}
+  else{renderNotFound(code);beep(300,200);if(navigator.vibrate)navigator.vibrate([80,50,80])}
 }
 async function closeScanner(){
   $('#scanner-overlay').classList.remove('show');
   if(html5QrCode){try{await html5QrCode.stop();await html5QrCode.clear()}catch(e){}}
 }
 
-async function handleExcel(file){
+// ========== آپلود ==========
+async function handleExcel(file, source){
+  log('handleExcel: ' + file.name + ' source=' + source);
   try{
-    showLoad('در حال خواندن فایل اکسل...',file.name);
-    const items=await parseExcel(file);
-    if(!items.length){hideLoad();toast('هیچ داده‌ای در فایل پیدا نشد');return}
-    showLoad('در حال ذخیره در حافظه...',`${items.length} کالا`);
-    await clearAll();
+    showLoad('در حال خواندن فایل...', file.name);
+    const items = await parseExcel(file);
+    if(!items.length){hideLoad();toast('داده‌ای یافت نشد');log('empty');return}
+
+    items.forEach(it => { it.source = source; });
+
+    showLoad('در حال ذخیره...', items.length + ' رکورد');
+    await clearBySource(source);
     await bulkInsert(items);
     hideLoad();
-    await updateCount();
+    await updateCounts();
     closeSettings();
-    toast(`✅ ${items.length} کالا با موفقیت ذخیره شد`,3500);
+    const label = source === 'book' ? 'کتاب' : 'غیرکتابی';
+    toast(`✅ ${items.length} ${label} ذخیره شد`, 3500);
+    log('done: ' + items.length);
   }catch(err){
-    console.error(err);hideLoad();
-    toast('خطا در پردازش فایل: '+(err.message||err));
+    hideLoad();
+    log('ERR: ' + (err.message||err));
+    toast('خطا: ' + (err.message||err), 6000);
+    showLog();
   }
 }
-async function updateCount(){
-  try{const c=await getCount();$('#productCount').textContent=fmt(c)+' کالا'}
-  catch(e){$('#productCount').textContent='—'}
+
+async function updateCounts(){
+  try{
+    const cb = await getCountBySource('book');
+    const cn = await getCountBySource('nonbook');
+    $('#countBook').textContent = fmt(cb) + ' رکورد';
+    $('#countNonbook').textContent = fmt(cn) + ' رکورد';
+    const total = cb + cn;
+    $('#statusBar').textContent = total
+      ? `📚 ${fmt(cb)} کتاب  •  📦 ${fmt(cn)} غیرکتابی`
+      : 'هنوز داده‌ای آپلود نشده — از تنظیمات اقدام کنید';
+  }catch(e){
+    $('#countBook').textContent = '—';
+    $('#countNonbook').textContent = '—';
+  }
 }
-function openSettings(){updateCount();$('#settings-panel').classList.add('show')}
+function openSettings(){updateCounts();$('#settings-panel').classList.add('show')}
 function closeSettings(){$('#settings-panel').classList.remove('show')}
 
-document.addEventListener('DOMContentLoaded',async()=>{
-  $('#searchBtn').onclick=doSearch;
-  $('#searchInput').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch()});
-  $('#scanBtn').onclick=doScan;
-  $('#closeScanner').onclick=closeScanner;
-  $('#settingsBtn').onclick=openSettings;
-  $('#closeSettings').onclick=closeSettings;
-  $('#uploadRow').onclick=()=>$('#excelInput').click();
-  $('#clearRow').onclick=async()=>{
-    if(confirm('همه داده‌ها حذف شوند؟')){
-      await clearAll();await updateCount();
-      $('#resultArea').innerHTML='';toast('داده‌ها پاک شدند');
+// ========== INIT ==========
+document.addEventListener('DOMContentLoaded', async ()=>{
+  $('#searchBtn').onclick = doSearch;
+  $('#searchInput').addEventListener('keydown', e=>{if(e.key==='Enter')doSearch()});
+  $('#scanBtn').onclick = doScan;
+  $('#closeScanner').onclick = closeScanner;
+  $('#settingsBtn').onclick = openSettings;
+  $('#closeSettings').onclick = closeSettings;
+  $('#logRow').onclick = ()=>logEl.classList.toggle('show');
+
+  $('#uploadBook').onclick = ()=>{ currentUploadType = 'book'; $('#excelInput').click(); };
+  $('#uploadNonbook').onclick = ()=>{ currentUploadType = 'nonbook'; $('#excelInput').click(); };
+
+  $('#clearRow').onclick = async ()=>{
+    if(confirm('همه داده‌ها (کتاب و غیرکتابی) حذف شوند؟')){
+      await clearAll(); await updateCounts();
+      $('#resultArea').innerHTML = ''; toast('همه داده‌ها پاک شدند');
     }
   };
-  $('#excelInput').addEventListener('change',e=>{
-    const f=e.target.files[0];if(f)handleExcel(f);e.target.value='';
+
+  $('#excelInput').addEventListener('change', e=>{
+    const f = e.target.files[0];
+    if(f) handleExcel(f, currentUploadType);
+    e.target.value = '';
   });
-  $('#settings-panel').addEventListener('click',e=>{
-    if(e.target.id==='settings-panel')closeSettings();
-  });
-  try{
-    const c=await getCount();
-    if(c===0) setTimeout(()=>toast('برای شروع، از تنظیمات فایل اکسل را آپلود کنید',4500),800);
-  }catch(e){}
+
+  $('#settings-panel').addEventListener('click', e=>{if(e.target.id==='settings-panel')closeSettings()});
+
+  await updateCounts();
+  log('init done');
 });
 </script>
 </body>
